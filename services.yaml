@@ -21,6 +21,12 @@ send_image:
       default: true
       selector:
         boolean:
+    compress:
+      name: Block Compression
+      description: Use WOLINK block compression to reduce BLE transfer time
+      default: true
+      selector:
+        boolean:
 
 drawcustom:
   name: Draw Custom
@@ -71,6 +77,12 @@ drawcustom:
       name: Dry Run
       description: Preview only — update the image entity without sending via BLE
       default: false
+      selector:
+        boolean:
+    compress:
+      name: Block Compression
+      description: Use WOLINK block compression to reduce BLE transfer time
+      default: true
       selector:
         boolean:
     ttl:

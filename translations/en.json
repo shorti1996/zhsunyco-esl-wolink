@@ -27,12 +27,14 @@
         "data": {
           "max_retry_count": "Max connection retries",
           "advertisement_timeout": "Advertisement wait timeout (seconds)",
-          "connect_timeout": "Connection timeout (seconds)"
+          "connect_timeout": "Connection timeout (seconds)",
+          "compress": "Block compression"
         },
         "data_description": {
           "max_retry_count": "Number of BLE connection attempts before giving up (1-10)",
           "advertisement_timeout": "How long to wait for the device to advertise (10-300s)",
-          "connect_timeout": "How long to wait for BLE connection after detection (5-60s)"
+          "connect_timeout": "How long to wait for BLE connection after detection (5-60s)",
+          "compress": "Compress image data before BLE transfer (faster for most images)"
         }
       }
     }

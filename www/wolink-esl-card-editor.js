@@ -1,16 +1,4 @@
-// Wolink ESL Card — Visual config editor for Lovelace UI
-import { LitElement, html, css } from "lit";
-
-class WolinkEslCardEditor extends LitElement {
-  static get properties() {
-    return {
-      hass: { type: Object },
-      _config: { type: Object },
-    };
-  }
-
-  static get styles() {
-    return css`
+import{i as e,a as t,b as i}from"./wolink-esl-card.js";customElements.define("wolink-esl-card-editor",class extends e{static get properties(){return{hass:{type:Object},_config:{type:Object}}}static get styles(){return t`
       :host {
         display: block;
       }
@@ -43,29 +31,13 @@ class WolinkEslCardEditor extends LitElement {
         font-size: 13px;
         resize: vertical;
       }
-    `;
-  }
-
-  setConfig(config) {
-    this._config = { ...config };
-  }
-
-  render() {
-    if (!this._config) {
-      return html``;
-    }
-
-    const payloadStr = this._config.payload
-      ? JSON.stringify(this._config.payload, null, 2)
-      : "[]";
-
-    return html`
+    `}setConfig(e){this._config={...e}}render(){if(!this._config)return i``;const e=this._config.payload?JSON.stringify(this._config.payload,null,2):"[]";return i`
       <div class="editor">
         <div class="field">
           <label>Entity:</label>
           <ha-entity-picker
             .hass="${this.hass}"
-            .value="${this._config.entity || ""}"
+            .value="${this._config.entity||""}"
             .includeDomains="${["image"]}"
             allow-custom-entity
             @value-changed="${this._entityChanged}"
@@ -75,7 +47,7 @@ class WolinkEslCardEditor extends LitElement {
         <div class="field">
           <label>Background:</label>
           <select
-            .value="${this._config.background || "white"}"
+            .value="${this._config.background||"white"}"
             @change="${this._backgroundChanged}"
           >
             <option value="white">White</option>
@@ -88,7 +60,7 @@ class WolinkEslCardEditor extends LitElement {
         <div class="field">
           <label>Rotation:</label>
           <select
-            .value="${String(this._config.rotate || 0)}"
+            .value="${String(this._config.rotate||0)}"
             @change="${this._rotationChanged}"
           >
             <option value="0">0°</option>
@@ -100,50 +72,7 @@ class WolinkEslCardEditor extends LitElement {
 
         <div class="field">
           <label>Payload (JSON):</label>
-          <textarea rows="10" .value="${payloadStr}" @input="${this._payloadChanged}"></textarea>
+          <textarea rows="10" .value="${e}" @input="${this._payloadChanged}"></textarea>
         </div>
       </div>
-    `;
-  }
-
-  _entityChanged(e) {
-    const newConfig = { ...this._config, entity: e.detail.value };
-    this._config = newConfig;
-    this._fireChanged(newConfig);
-  }
-
-  _backgroundChanged(e) {
-    const newConfig = { ...this._config, background: e.target.value };
-    this._config = newConfig;
-    this._fireChanged(newConfig);
-  }
-
-  _rotationChanged(e) {
-    const newConfig = { ...this._config, rotate: parseInt(e.target.value, 10) };
-    this._config = newConfig;
-    this._fireChanged(newConfig);
-  }
-
-  _payloadChanged(e) {
-    try {
-      const payload = JSON.parse(e.target.value);
-      const newConfig = { ...this._config, payload };
-      this._config = newConfig;
-      this._fireChanged(newConfig);
-    } catch (_) {
-      // Don't fire config-changed for invalid JSON
-    }
-  }
-
-  _fireChanged(config) {
-    this.dispatchEvent(
-      new CustomEvent("config-changed", {
-        detail: { config },
-        bubbles: true,
-        composed: true,
-      })
-    );
-  }
-}
-
-customElements.define("wolink-esl-card-editor", WolinkEslCardEditor);
+    `}_entityChanged(e){const t={...this._config,entity:e.detail.value};this._config=t,this._fireChanged(t)}_backgroundChanged(e){const t={...this._config,background:e.target.value};this._config=t,this._fireChanged(t)}_rotationChanged(e){const t={...this._config,rotate:parseInt(e.target.value,10)};this._config=t,this._fireChanged(t)}_payloadChanged(e){try{const t=JSON.parse(e.target.value),i={...this._config,payload:t};this._config=i,this._fireChanged(i)}catch(e){}}_fireChanged(e){this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:e},bubbles:!0,composed:!0}))}});

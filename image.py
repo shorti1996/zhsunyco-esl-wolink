@@ -45,6 +45,8 @@ class WolinkDisplayPreview(ImageEntity):
             name=f"Wolink ESL {coordinator.device_profile['name']}",
             manufacturer="Zhsunyco/Wolink",
             model=coordinator.device_profile["name"],
+            sw_version=coordinator.firmware_version,
+            hw_version=coordinator.hardware_version,
         )
         # Register with coordinator for preview updates
         coordinator.set_image_entity(self)

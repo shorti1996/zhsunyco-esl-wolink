@@ -18,11 +18,12 @@ JSMODULES: Final[list[dict[str, str]]] = [
         "filename": "wolink-esl-card.js",
         "version": INTEGRATION_VERSION,
     },
-    {
-        "name": "Wolink ESL Card Editor",
-        "filename": "wolink-esl-card-editor.js",
-        "version": INTEGRATION_VERSION,
-    },
+# wolink-esl-card.js imports the editor via import("./wolink-esl-card-editor.js")
+    # {
+    #     "name": "Wolink ESL Card Editor",
+    #     "filename": "wolink-esl-card-editor.js",
+    #     "version": INTEGRATION_VERSION,
+    # },
 ]
 
 CONF_DEVICE_MODEL = "device_model"
@@ -33,5 +34,8 @@ CONF_CONNECT_TIMEOUT = "connect_timeout"
 DEFAULT_RETRY_COUNT = 5
 DEFAULT_AD_TIMEOUT = 60
 DEFAULT_CONNECT_TIMEOUT = 15
+
+CONF_COMPRESS = "compress"
+DEFAULT_COMPRESS = True
 
 DISPLAY_STATUSES = ["idle", "sending", "success", "error"]

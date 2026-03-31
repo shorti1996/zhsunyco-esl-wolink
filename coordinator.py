@@ -20,10 +20,12 @@ from bleak_retry_connector import BleakClientWithServiceCache, establish_connect
 
 from .const import (
     CONF_AD_TIMEOUT,
+    CONF_COMPRESS,
     CONF_CONNECT_TIMEOUT,
     CONF_DEVICE_MODEL,
     CONF_MAX_RETRY_COUNT,
     DEFAULT_AD_TIMEOUT,
+    DEFAULT_COMPRESS,
     DEFAULT_CONNECT_TIMEOUT,
     DEFAULT_RETRY_COUNT,
     DOMAIN,
@@ -71,6 +73,12 @@ class WolinkEslCoordinator:
         self.last_error: str | None = None
         self._status_listeners: list[Callable[[], None]] = []
 
+        # Device properties (populated from BLE advertisement manufacturer data)
+        self.battery_voltage_mv: int | None = None
+        self.firmware_version: str | None = None
+        self.hardware_version: str | None = None
+        self.display_driver_version: str | None = None
+
     def register_status_listener(self, callback: Callable[[], None]) -> None:
         """Register a callback to be invoked when display status changes."""
         self._status_listeners.append(callback)
@@ -80,9 +88,27 @@ class WolinkEslCoordinator:
         for cb in self._status_listeners:
             cb()
 
+    # Manufacturer data company ID for Wolink devices
+    WOLINK_COMPANY_ID = 0xBBAA
+
     def set_ble_device(self, ble_device: BLEDevice) -> None:
         """Update cached BLE device reference from advertisement callback."""
         self._ble_device = ble_device
+
+    def update_from_advertisement(self, manufacturer_data: dict[int, bytes]) -> None:
+        """Parse manufacturer data from BLE advertisement.
+
+        Format (after company ID 0xBBAA):
+          Bytes 0-1: PID, 2-3: AppVer, 4-5: HwVer, 6-7: DispVer, 8-9: BatVoltage_mv
+        """
+        data = manufacturer_data.get(self.WOLINK_COMPANY_ID)
+        if data is None or len(data) < 10:
+            return
+        self.battery_voltage_mv = int.from_bytes(data[8:10], "big")
+        self.firmware_version = f"{data[2]}.{data[3]}"
+        self.hardware_version = f"{data[4]}.{data[5]}"
+        self.display_driver_version = f"{data[6]}.{data[7]}"
+        self._notify_status_listeners()
 
     def set_image_entity(self, entity: object) -> None:
         """Register the ImageEntity for preview updates."""
@@ -133,12 +159,16 @@ class WolinkEslCoordinator:
         dither: bool | str = True,
         color_mode: str | None = None,
         dither_mask: PILImage.Image | None = None,
+        compress: bool | None = None,
     ) -> None:
         """Full pipeline: quantize PIL image, send via BLE, update preview."""
         async with self._lock:
             self.display_status = "sending"
             self.last_error = None
             self._notify_status_listeners()
+
+            if compress is None:
+                compress = self.entry.options.get(CONF_COMPRESS, DEFAULT_COMPRESS)
 
             if color_mode is None:
                 color_mode = self.device_profile["color"]
@@ -170,7 +200,7 @@ class WolinkEslCoordinator:
             # 2. If connect fails, wait for a fresh advertisement and connect
             #    immediately within the same wake window
             # 3. Repeat up to max_attempts times
-            max_attempts = self.entry.options.get(CONF_MAX_RETRY_COUNT, DEFAULT_RETRY_COUNT)
+            max_attempts = int(self.entry.options.get(CONF_MAX_RETRY_COUNT, DEFAULT_RETRY_COUNT))
             ad_timeout = self.entry.options.get(CONF_AD_TIMEOUT, DEFAULT_AD_TIMEOUT)
             connect_timeout = self.entry.options.get(CONF_CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT)
             last_err: Exception | None = None
@@ -231,7 +261,7 @@ class WolinkEslCoordinator:
                     client = ZhsunycoClient(ble_device, config=self.label_config)
                     client.set_client(ble_client)
                     await client.initialize()
-                    await client.send_image_planes(*planes)
+                    await client.send_image_planes(*planes, compress=compress)
                 except Exception as err:
                     _LOGGER.warning(
                         "Attempt %d/%d: send to %s failed: %s",

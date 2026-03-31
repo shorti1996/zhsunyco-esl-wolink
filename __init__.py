@@ -45,6 +45,7 @@ SEND_IMAGE_SCHEMA = vol.Schema(
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("image"): cv.string,
         vol.Optional("dither", default=True): cv.boolean,
+        vol.Optional("compress"): cv.boolean,
     }
 )
 
@@ -57,6 +58,7 @@ DRAWCUSTOM_SCHEMA = vol.Schema(
         vol.Optional("dither", default="floyd-steinberg"): cv.string,
         vol.Optional("dry_run", default=False): cv.boolean,
         vol.Optional("ttl"): vol.Any(int, None),
+        vol.Optional("compress"): cv.boolean,
     }
 )
 
@@ -92,10 +94,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         coordinator.set_ble_device(ble_device)
 
     # Register BLE advertisement callback to keep device reference fresh
+    # and parse manufacturer data for battery voltage / firmware versions
+    def _handle_advertisement(service_info, change):
+        coordinator.set_ble_device(service_info.device)
+        if service_info.manufacturer_data:
+            coordinator.update_from_advertisement(service_info.manufacturer_data)
+
     entry.async_on_unload(
         bluetooth.async_register_callback(
             hass,
-            lambda service_info, change: coordinator.set_ble_device(service_info.device),
+            _handle_advertisement,
             BluetoothCallbackMatcher(address=entry.data[CONF_ADDRESS]),
             BluetoothScanningMode.PASSIVE,
         )
@@ -138,7 +146,9 @@ def _register_services(hass: HomeAssistant) -> None:
         except Exception as err:
             raise HomeAssistantError(f"Failed to open image: {err}") from err
 
-        await coordinator.async_send_image(pil_image, dither=dither)
+        await coordinator.async_send_image(
+            pil_image, dither=dither, compress=call.data.get("compress"),
+        )
 
     hass.services.async_register(
         DOMAIN,
@@ -196,6 +206,7 @@ def _register_services(hass: HomeAssistant) -> None:
             pil_image,
             dither=dither_method,
             dither_mask=dither_mask,
+            compress=call.data.get("compress"),
         )
 
     hass.services.async_register(
@@ -217,7 +228,10 @@ def _get_coordinator_for_entity(
         return hass.data.get(DOMAIN, {}).get(entry.config_entry_id)
 
     # Fallback: if only one device configured, use it
-    coordinators = list(hass.data.get(DOMAIN, {}).values())
+    coordinators = [
+        v for v in hass.data.get(DOMAIN, {}).values()
+        if isinstance(v, WolinkEslCoordinator)
+    ]
     if len(coordinators) == 1:
         return coordinators[0]
 

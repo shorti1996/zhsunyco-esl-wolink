@@ -35,6 +35,7 @@ async def async_setup_entry(
         WolinkResolutionSensor(coordinator),
         WolinkDisplayStatusSensor(coordinator),
         WolinkLastRefreshSensor(coordinator),
+        WolinkBatteryVoltageSensor(coordinator),
     ])
 
 
@@ -79,11 +80,24 @@ class WolinkDisplayStatusSensor(SensorEntity):
     def native_value(self) -> str:
         return self._coordinator.display_status
 
+    # Error codes from BLE Display API (status characteristic byte 1)
+    ERR_CODES = {
+        0: "none",
+        1: "EPD init error",
+        2: "EPD write error",
+        3: "decompression error",
+        4: "OTA error",
+        5: "unlock failed",
+    }
+
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
+        attrs: dict[str, Any] = {}
         if self._coordinator.last_error:
-            return {"last_error": self._coordinator.last_error}
-        return None
+            attrs["last_error"] = self._coordinator.last_error
+        if self._coordinator.display_driver_version:
+            attrs["display_driver_version"] = self._coordinator.display_driver_version
+        return attrs or None
 
     async def async_added_to_hass(self) -> None:
         self._coordinator.register_status_listener(self.async_write_ha_state)
@@ -121,4 +135,29 @@ class WolinkLastRefreshSensor(RestoreSensor):
                 )
             except (ValueError, TypeError):
                 pass
+        self._coordinator.register_status_listener(self.async_write_ha_state)
+
+
+class WolinkBatteryVoltageSensor(SensorEntity):
+    """Battery voltage reported via BLE advertisement manufacturer data."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Battery Voltage"
+    _attr_icon = "mdi:battery"
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_native_unit_of_measurement = "mV"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: WolinkEslCoordinator) -> None:
+        self._coordinator = coordinator
+        self._attr_unique_id = f"{coordinator.address}_battery_voltage"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, coordinator.address)},
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        return self._coordinator.battery_voltage_mv
+
+    async def async_added_to_hass(self) -> None:
         self._coordinator.register_status_listener(self.async_write_ha_state)

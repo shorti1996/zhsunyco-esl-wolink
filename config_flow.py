@@ -17,10 +17,12 @@ from homeassistant.helpers.selector import selector
 
 from .const import (
     CONF_AD_TIMEOUT,
+    CONF_COMPRESS,
     CONF_CONNECT_TIMEOUT,
     CONF_DEVICE_MODEL,
     CONF_MAX_RETRY_COUNT,
     DEFAULT_AD_TIMEOUT,
+    DEFAULT_COMPRESS,
     DEFAULT_CONNECT_TIMEOUT,
     DEFAULT_RETRY_COUNT,
     DOMAIN,
@@ -197,6 +199,12 @@ class WolinkEslOptionsFlowHandler(OptionsFlow):
                             CONF_CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT
                         ),
                     ): selector({"number": {"min": 5, "max": 60, "mode": "box", "unit_of_measurement": "s"}}),
+                    vol.Required(
+                        CONF_COMPRESS,
+                        default=self.config_entry.options.get(
+                            CONF_COMPRESS, DEFAULT_COMPRESS
+                        ),
+                    ): selector({"boolean": {}}),
                 }
             ),
         )
