@@ -1,0 +1,83 @@
+send_image:
+  name: Send Image
+  description: Send an image file to a Wolink ESL e-paper display
+  fields:
+    entity_id:
+      name: Entity
+      description: The Wolink ESL display entity to send the image to
+      required: true
+      selector:
+        entity:
+          integration: wolink_esl
+    image:
+      name: Image Path
+      description: Path to the image file to send
+      required: true
+      selector:
+        text:
+    dither:
+      name: Dithering
+      description: Enable Floyd-Steinberg dithering (better for photos)
+      default: true
+      selector:
+        boolean:
+
+drawcustom:
+  name: Draw Custom
+  description: Render a drawcustom payload and send to a Wolink ESL e-paper display
+  fields:
+    entity_id:
+      name: Entity
+      description: The Wolink ESL display entity to render to
+      required: true
+      selector:
+        entity:
+          integration: wolink_esl
+    payload:
+      name: Payload
+      description: List of drawcustom element dicts (text, line, rectangle, icon, dlimg, etc.)
+      required: true
+      selector:
+        object:
+    background:
+      name: Background Color
+      description: Canvas background color
+      default: "white"
+      selector:
+        select:
+          options:
+            - "white"
+            - "black"
+            - "red"
+            - "yellow"
+    rotate:
+      name: Rotation
+      description: Rotate the canvas (degrees)
+      default: 0
+      selector:
+        select:
+          options:
+            - "0"
+            - "90"
+            - "180"
+            - "270"
+    dither:
+      name: Dither Algorithm
+      description: Dithering algorithm for color quantization
+      default: "floyd-steinberg"
+      selector:
+        text:
+    dry_run:
+      name: Dry Run
+      description: Preview only — update the image entity without sending via BLE
+      default: false
+      selector:
+        boolean:
+    ttl:
+      name: Time-to-Live
+      description: Accepted for OEPL compatibility. Has no effect on BLE-direct devices.
+      selector:
+        number:
+          min: 0
+          max: 86400
+          mode: box

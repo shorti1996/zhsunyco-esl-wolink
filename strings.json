@@ -1,0 +1,40 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Select a Wolink ESL device to configure, or enter a MAC address manually.",
+        "data": {
+          "address": "Device",
+          "device_model": "Display model"
+        }
+      },
+      "bluetooth_confirm": {
+        "description": "Found Wolink ESL device: {name}. Select the display model.",
+        "data": {
+          "device_model": "Display model"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "already_in_progress": "Configuration flow is already in progress",
+      "no_devices_found": "No Wolink ESL devices found nearby"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "max_retry_count": "Max connection retries",
+          "advertisement_timeout": "Advertisement wait timeout (seconds)",
+          "connect_timeout": "Connection timeout (seconds)"
+        },
+        "data_description": {
+          "max_retry_count": "Number of BLE connection attempts before giving up (1-10)",
+          "advertisement_timeout": "How long to wait for the device to advertise (10-300s)",
+          "connect_timeout": "How long to wait for BLE connection after detection (5-60s)"
+        }
+      }
+    }
+  }
+}

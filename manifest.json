@@ -1,0 +1,28 @@
+{
+  "domain": "wolink_esl",
+  "name": "Wolink BLE E-Paper Labels",
+  "version": "0.1.0",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [
+    "bluetooth",
+    "bluetooth_adapters",
+    "frontend",
+    "http"
+  ],
+  "after_dependencies": ["lovelace"],
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "bluetooth": [
+    {
+      "service_uuid": "30323032-4c53-4545-4c42-4b4e494c4f57"
+    }
+  ],
+  "requirements": [
+    "bleak-retry-connector>=3.5.0",
+    "cryptography>=46.0.5",
+    "Pillow>=10.0.0",
+    "qrcode[pil]>=7.0",
+    "python-barcode>=0.15.0"
+  ]
+}
