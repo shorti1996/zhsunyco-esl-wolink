@@ -921,7 +921,7 @@ async def _resolve_templates(hass: HomeAssistant, payload: list[dict[str, Any]])
     from homeassistant.helpers.template import Template
 
     def _resolve_value(value: Any) -> Any:
-        if isinstance(value, str) and "{{" in value:
+        if isinstance(value, str) and ("{{" in value or "{%" in value):
             try:
                 tpl = Template(value, hass)
                 return tpl.async_render()

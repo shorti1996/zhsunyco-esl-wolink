@@ -21,9 +21,11 @@ from .const import (
     CONF_CONNECT_TIMEOUT,
     CONF_DEVICE_MODEL,
     CONF_MAX_RETRY_COUNT,
+    CONF_MIRROR,
     DEFAULT_AD_TIMEOUT,
     DEFAULT_COMPRESS,
     DEFAULT_CONNECT_TIMEOUT,
+    DEFAULT_MIRROR,
     DEFAULT_RETRY_COUNT,
     DOMAIN,
 )
@@ -205,6 +207,12 @@ class WolinkEslOptionsFlowHandler(OptionsFlow):
                             CONF_COMPRESS, DEFAULT_COMPRESS
                         ),
                     ): selector({"boolean": {}}),
+                    vol.Required(
+                        CONF_MIRROR,
+                        default=self.config_entry.options.get(
+                            CONF_MIRROR, DEFAULT_MIRROR
+                        ),
+                    ): selector({"select": {"options": ["none", "horizontal", "vertical"]}}),
                 }
             ),
         )

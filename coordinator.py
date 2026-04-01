@@ -27,8 +27,10 @@ from .const import (
     DEFAULT_AD_TIMEOUT,
     DEFAULT_COMPRESS,
     DEFAULT_CONNECT_TIMEOUT,
+    DEFAULT_MIRROR,
     DEFAULT_RETRY_COUNT,
     DOMAIN,
+    CONF_MIRROR,
 )
 from .wolink import (
     DEVICES,
@@ -160,6 +162,7 @@ class WolinkEslCoordinator:
         color_mode: str | None = None,
         dither_mask: PILImage.Image | None = None,
         compress: bool | None = None,
+        mirror: str | None = None,
     ) -> None:
         """Full pipeline: quantize PIL image, send via BLE, update preview."""
         async with self._lock:
@@ -169,6 +172,18 @@ class WolinkEslCoordinator:
 
             if compress is None:
                 compress = self.entry.options.get(CONF_COMPRESS, DEFAULT_COMPRESS)
+
+            if mirror is None:
+                mirror = self.entry.options.get(CONF_MIRROR, DEFAULT_MIRROR)
+            if mirror and mirror != "none":
+                _LOGGER.debug("Device %s: applying %s mirror", self.address, mirror)
+                from PIL.Image import Transpose
+                if mirror == "horizontal":
+                    pil_image = pil_image.transpose(Transpose.FLIP_LEFT_RIGHT)
+                elif mirror == "vertical":
+                    pil_image = pil_image.transpose(Transpose.FLIP_TOP_BOTTOM)
+            else:
+                _LOGGER.debug("Device %s: no mirror (mirror=%s)", self.address, mirror)
 
             if color_mode is None:
                 color_mode = self.device_profile["color"]

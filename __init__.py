@@ -25,7 +25,7 @@ from homeassistant.core import CoreState
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 
-from .const import DOMAIN
+from .const import CONF_MIRROR, DEFAULT_MIRROR, DOMAIN
 from .coordinator import WolinkEslCoordinator
 from .frontend import JSModuleRegistration
 
@@ -46,6 +46,7 @@ SEND_IMAGE_SCHEMA = vol.Schema(
         vol.Required("image"): cv.string,
         vol.Optional("dither", default=True): cv.boolean,
         vol.Optional("compress"): cv.boolean,
+        vol.Optional("mirror"): cv.string,
     }
 )
 
@@ -59,6 +60,7 @@ DRAWCUSTOM_SCHEMA = vol.Schema(
         vol.Optional("dry_run", default=False): cv.boolean,
         vol.Optional("ttl"): vol.Any(int, None),
         vol.Optional("compress"): cv.boolean,
+        vol.Optional("mirror"): cv.string,
     }
 )
 
@@ -148,6 +150,7 @@ def _register_services(hass: HomeAssistant) -> None:
 
         await coordinator.async_send_image(
             pil_image, dither=dither, compress=call.data.get("compress"),
+            mirror=call.data.get("mirror"),
         )
 
     hass.services.async_register(
@@ -183,6 +186,20 @@ def _register_services(hass: HomeAssistant) -> None:
             # Quantize + render preview so it matches what the display will show
             from .wolink import process_pil_image, render_preview
 
+            from PIL.Image import Transpose
+
+            mirror = call.data.get("mirror")
+            if mirror is None:
+                mirror = coordinator.entry.options.get(CONF_MIRROR, DEFAULT_MIRROR)
+            if mirror and mirror != "none":
+                _LOGGER.debug("dry_run: applying %s mirror", mirror)
+                if mirror == "horizontal":
+                    pil_image = pil_image.transpose(Transpose.FLIP_LEFT_RIGHT)
+                elif mirror == "vertical":
+                    pil_image = pil_image.transpose(Transpose.FLIP_TOP_BOTTOM)
+            else:
+                _LOGGER.debug("dry_run: no mirror (mirror=%s)", mirror)
+
             planes = await hass.async_add_executor_job(
                 process_pil_image,
                 pil_image,
@@ -207,6 +224,7 @@ def _register_services(hass: HomeAssistant) -> None:
             dither=dither_method,
             dither_mask=dither_mask,
             compress=call.data.get("compress"),
+            mirror=call.data.get("mirror"),
         )
 
     hass.services.async_register(

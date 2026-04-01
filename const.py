@@ -38,4 +38,7 @@ DEFAULT_CONNECT_TIMEOUT = 15
 CONF_COMPRESS = "compress"
 DEFAULT_COMPRESS = True
 
+CONF_MIRROR = "mirror"
+DEFAULT_MIRROR = "none"
+
 DISPLAY_STATUSES = ["idle", "sending", "success", "error"]

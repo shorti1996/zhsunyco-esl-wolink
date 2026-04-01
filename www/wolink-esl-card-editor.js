@@ -71,8 +71,20 @@ import{i as e,a as t,b as i}from"./wolink-esl-card.js";class o extends e{static 
         </div>
 
         <div class="field">
+          <label>Mirror:</label>
+          <select
+            .value="${this._config.mirror||"none"}"
+            @change="${this._mirrorChanged}"
+          >
+            <option value="none">None</option>
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">Vertical</option>
+          </select>
+        </div>
+
+        <div class="field">
           <label>Payload (JSON):</label>
           <textarea rows="10" .value="${e}" @input="${this._payloadChanged}"></textarea>
         </div>
       </div>
-    `}_entityChanged(e){const t={...this._config,entity:e.detail.value};this._config=t,this._fireChanged(t)}_backgroundChanged(e){const t={...this._config,background:e.target.value};this._config=t,this._fireChanged(t)}_rotationChanged(e){const t={...this._config,rotate:parseInt(e.target.value,10)};this._config=t,this._fireChanged(t)}_payloadChanged(e){try{const t=JSON.parse(e.target.value),i={...this._config,payload:t};this._config=i,this._fireChanged(i)}catch(e){}}_fireChanged(e){this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:e},bubbles:!0,composed:!0}))}}customElements.get("wolink-esl-card-editor")||customElements.define("wolink-esl-card-editor",o);
+    `}_entityChanged(e){const t={...this._config,entity:e.detail.value};this._config=t,this._fireChanged(t)}_backgroundChanged(e){const t={...this._config,background:e.target.value};this._config=t,this._fireChanged(t)}_rotationChanged(e){const t={...this._config,rotate:parseInt(e.target.value,10)};this._config=t,this._fireChanged(t)}_mirrorChanged(e){const t={...this._config,mirror:e.target.value};this._config=t,this._fireChanged(t)}_payloadChanged(e){try{const t=JSON.parse(e.target.value),i={...this._config,payload:t};this._config=i,this._fireChanged(i)}catch(e){}}_fireChanged(e){this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:e},bubbles:!0,composed:!0}))}}customElements.get("wolink-esl-card-editor")||customElements.define("wolink-esl-card-editor",o);

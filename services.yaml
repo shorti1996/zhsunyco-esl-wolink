@@ -27,6 +27,15 @@ send_image:
       default: true
       selector:
         boolean:
+    mirror:
+      name: Display Mirroring
+      description: Flip the image before sending (overrides device setting)
+      selector:
+        select:
+          options:
+            - "none"
+            - "horizontal"
+            - "vertical"
 
 drawcustom:
   name: Draw Custom
@@ -85,6 +94,15 @@ drawcustom:
       default: true
       selector:
         boolean:
+    mirror:
+      name: Display Mirroring
+      description: Flip the image before sending (overrides device setting)
+      selector:
+        select:
+          options:
+            - "none"
+            - "horizontal"
+            - "vertical"
     ttl:
       name: Time-to-Live
       description: Accepted for OEPL compatibility. Has no effect on BLE-direct devices.
