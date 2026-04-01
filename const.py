@@ -10,7 +10,7 @@ _MANIFEST_PATH = Path(__file__).parent / "manifest.json"
 with open(_MANIFEST_PATH, encoding="utf-8") as _f:
     INTEGRATION_VERSION: Final[str] = json.load(_f).get("version", "0.0.0")
 
-URL_BASE: Final[str] = "/wolink_esl"
+URL_BASE: Final[str] = "/hacsfiles/wolink_esl"
 
 JSMODULES: Final[list[dict[str, str]]] = [
     {

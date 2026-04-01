@@ -1,7 +1,7 @@
 {
   "domain": "wolink_esl",
   "name": "Wolink BLE E-Paper Labels",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "codeowners": [],
   "config_flow": true,
   "dependencies": [
