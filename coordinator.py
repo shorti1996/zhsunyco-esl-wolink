@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
+import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -165,7 +166,18 @@ class WolinkEslCoordinator:
         mirror: str | None = None,
     ) -> None:
         """Full pipeline: quantize PIL image, send via BLE, update preview."""
+        send_started = time.monotonic()
+        _LOGGER.info(
+            "BLE send enter address=%s model=%s",
+            self.address, self.device_profile["name"],
+        )
         async with self._lock:
+            lock_wait = time.monotonic() - send_started
+            if lock_wait > 0.1:
+                _LOGGER.debug(
+                    "BLE send address=%s waited %.2fs for lock",
+                    self.address, lock_wait,
+                )
             self.display_status = "sending"
             self.last_error = None
             self._notify_status_listeners()
@@ -294,9 +306,11 @@ class WolinkEslCoordinator:
                 self.last_refresh = datetime.now(UTC)
                 self.last_error = None
                 self._notify_status_listeners()
+                elapsed = time.monotonic() - send_started
                 _LOGGER.info(
-                    "Image sent to %s (%s) on attempt %d",
-                    self.address, self.device_profile["name"], attempt,
+                    "BLE send success address=%s model=%s attempt=%d/%d elapsed=%.2fs",
+                    self.address, self.device_profile["name"],
+                    attempt, max_attempts, elapsed,
                 )
                 return
 
@@ -304,6 +318,11 @@ class WolinkEslCoordinator:
             self.display_status = "error"
             self.last_error = str(last_err)
             self._notify_status_listeners()
+            elapsed = time.monotonic() - send_started
+            _LOGGER.warning(
+                "BLE send exhausted address=%s attempts=%d elapsed=%.2fs err=%s",
+                self.address, max_attempts, elapsed, last_err,
+            )
             raise HomeAssistantError(
                 f"Failed to send image to {self.address} after {max_attempts} attempts: {last_err}"
             ) from last_err
