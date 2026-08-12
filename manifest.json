@@ -18,6 +18,12 @@
   "bluetooth": [
     {
       "service_uuid": "30323032-4c53-4545-4c42-4b4e494c4f57"
+    },
+    {
+      "manufacturer_id": 48042
+    },
+    {
+      "local_name": "WLA*"
     }
   ],
   "requirements": [
