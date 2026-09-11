@@ -865,12 +865,12 @@ def _render_sync(
     from .wolink import _DITHER_INDEX
 
     bg_color = _resolve_color(background)
-    canvas = Image.new("RGBA", (width, height), bg_color)
+    canvas = Image.new("RGBA", (width if rotate % 180 != 90 else height, height if rotate % 180 != 90 else width), bg_color)
     draw = ImageDraw.Draw(canvas)
 
     # Build dither mask: background inherits global setting
     bg_mask_val = _DITHER_INDEX.get(global_dither, 0)
-    mask = Image.new("L", (width, height), bg_mask_val)
+    mask = Image.new("L", (width if rotate % 180 != 90 else height, height if rotate % 180 != 90 else width), bg_mask_val)
     mask_draw = ImageDraw.Draw(mask)
 
     has_per_element_dither = False
