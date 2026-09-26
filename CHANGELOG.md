@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.15
+
+- No user-facing changes
+
+
 ## v0.2.14
 
 - No user-facing changes
